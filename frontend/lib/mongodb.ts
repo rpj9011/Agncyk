@@ -1,55 +1,37 @@
-import mongoose from 'mongoose'
-
-const MONGODB_URI = process.env.MONGODB_URI
-
-if (!MONGODB_URI) {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('Please define MONGODB_URI in environment variables')
-  } else {
-    console.warn('MONGODB_URI not defined - running in development mode without database')
-  }
-}
-
-interface MongooseCache {
-  conn: typeof mongoose | null
-  promise: Promise<typeof mongoose> | null
-}
+import mongoose from "mongoose"
 
 declare global {
-  var mongoose: MongooseCache
+  var mongooseGlobal: {
+    conn: typeof mongoose | null
+    promise: Promise<typeof mongoose> | null
+  }
 }
 
-let cached: MongooseCache = global.mongoose || { conn: null, promise: null }
-
-if (!global.mongoose) {
-  global.mongoose = cached
+if (!global.mongooseGlobal) {
+  global.mongooseGlobal = { conn: null, promise: null }
 }
 
-async function connectDB() {
-  if (!MONGODB_URI) {
-    throw new Error('MongoDB URI not configured')
+export async function connectDB() {
+  if (!process.env.MONGODB_URI) {
+    throw new Error("MONGODB_URI not defined")
   }
 
-  if (cached.conn) {
-    return cached.conn
+  if (global.mongooseGlobal.conn) {
+    return global.mongooseGlobal.conn
   }
 
-  if (!cached.promise) {
+  if (!global.mongooseGlobal.promise) {
     const opts = {
       bufferCommands: false,
     }
-
-    cached.promise = mongoose.connect(MONGODB_URI, opts)
+    global.mongooseGlobal.promise = mongoose.connect(
+      process.env.MONGODB_URI,
+      opts
+    )
   }
 
-  try {
-    cached.conn = await cached.promise
-  } catch (e) {
-    cached.promise = null
-    throw e
-  }
-
-  return cached.conn
+  global.mongooseGlobal.conn = await global.mongooseGlobal.promise
+  return global.mongooseGlobal.conn
 }
 
 export default connectDB

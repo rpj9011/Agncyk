@@ -55,17 +55,20 @@ export async function POST(request: NextRequest) {
     // Sanitize input
     const sanitizedData = sanitizeLead(body)
 
-    // In development, if MongoDB is not configured, just return success
-    if (process.env.NODE_ENV === 'development' && (!process.env.MONGODB_URI || process.env.MONGODB_URI.includes('username:password'))) {
-      console.log('Development mode: Contact form submission received:', sanitizedData)
-      return NextResponse.json(
-        {
-          success: true,
-          message: 'Thank you! We will contact you within 24 hours. (Development mode - no database)',
-          leadId: 'dev-' + Date.now(),
-        },
-        { status: 201 }
-      )
+    // Check if MongoDB is configured
+    if (!process.env.MONGODB_URI) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Development mode: Contact form submission received:', sanitizedData)
+        return NextResponse.json(
+          {
+            success: true,
+            message: 'Thank you! We will contact you within 24 hours. (Development mode - no database)',
+            leadId: 'dev-' + Date.now(),
+          },
+          { status: 201 }
+        )
+      }
+      throw new Error('MONGODB_URI not configured')
     }
 
     // Connect to database
