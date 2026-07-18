@@ -2,25 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
     --font-inter: 'Inter', system-ui, sans-serif;
     --font-display: 'Playfair Display', Georgia, serif;
+    --color-background: #0F0F0F;
+    --color-surface: #16130e;
+    --color-surface-container: #221f1a;
+    --color-primary: #e6c277;
+    --color-cobalt: #2E5BFF;
+    --color-success: #00E676;
+    --color-on-surface: #e9e1d8;
+    --color-on-surface-variant: #d0c5b4;
+    --color-outline: #998f80;
+    --color-outline-variant: #4d4639;
   }
   
+  html {
+    background-color: #0F0F0F;
+  }
+
   body {
-    @apply bg-luxury-off-white text-luxury-charcoal;
+    background-color: #0F0F0F;
+    color: #e9e1d8;
     font-family: var(--font-inter);
-    font-weight: 300;
+    font-weight: 400;
     letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.02em;
+    color: #e9e1d8;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    background: #100e09;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #4d4639;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #e6c277;
   }
 }
 
@@ -29,9 +60,9 @@
     text-wrap: balance;
   }
   
-  /* Section spacing system */
+  /* Section spacing — 120px as specified */
   .section-padding {
-    @apply py-32;
+    @apply py-[120px];
   }
   
   @media (max-width: 1024px) {
@@ -45,10 +76,138 @@
       @apply py-16;
     }
   }
-  
+
+  /* --- Design System Utilities --- */
+
+  /* Metric number block — Inter 700 tight tracking */
+  .metric-num {
+    font-family: var(--font-inter);
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--color-primary);
+  }
+
+  .metric-num-sm {
+    font-family: var(--font-inter);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--color-primary);
+  }
+
+  .metric-num-success {
+    font-family: var(--font-inter);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--color-success);
+  }
+
+  /* Label caps — uppercase Inter 700, wide tracking */
+  .label-caps {
+    font-family: var(--font-inter);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-on-surface-variant);
+  }
+
+  /* Hairline divider */
+  .hairline {
+    width: 1px;
+    background-color: var(--color-outline-variant);
+    align-self: stretch;
+  }
+
+  /* Engineered card — dark bg with tonal border */
+  .card-dark {
+    background-color: var(--color-surface-container);
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 0px;
+    transition: border-color 0.3s ease;
+  }
+  .card-dark:hover {
+    border-color: var(--color-primary);
+  }
+
+  /* Cobalt interactive */
+  .focus-cobalt:focus {
+    outline: none;
+    border-color: var(--color-cobalt);
+    box-shadow: 0 0 0 2px rgba(46, 91, 255, 0.2);
+  }
+
+  /* Primary Gold Button */
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: #402d00;
+    padding: 0.75rem 2rem;
+    border-radius: 0.25rem;
+    font-family: var(--font-inter);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover {
+    background-color: #c6a45c;
+    box-shadow: 0 4px 24px rgba(230, 194, 119, 0.35);
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--color-on-surface);
+    padding: 0.75rem 2rem;
+    border-radius: 0.25rem;
+    border: 1px solid rgba(198, 199, 194, 0.3);
+    font-family: var(--font-inter);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+  }
+  .btn-ghost:hover {
+    background-color: var(--color-cobalt);
+    border-color: var(--color-cobalt);
+    color: #ffffff;
+  }
+
   /* Grain animation */
   .animate-grain {
     animation: grain 8s steps(10) infinite;
+  }
+
+  /* Large bg serif number (Process section) */
+  .process-bg-num {
+    font-family: var(--font-display);
+    font-size: 160px;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(230, 194, 119, 0.04);
+    position: absolute;
+    top: -20px;
+    left: -16px;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
   }
 }
 
@@ -61,7 +220,7 @@
   }
 }
 
-/* Grain texture animation */
+/* Grain texture keyframes */
 @keyframes grain {
   0%, 100% { transform: translate(0, 0); }
   10% { transform: translate(-5%, -10%); }
@@ -84,4 +243,29 @@
 
 .animate-shake {
   animation: shake 0.3s ease-in-out;
+}
+
+/* Input focus cobalt state */
+.input-dark {
+  background-color: rgba(30, 27, 22, 0.8);
+  border: 1px solid rgba(77, 70, 57, 0.8);
+  border-radius: 0.25rem;
+  color: #e9e1d8;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.input-dark:focus {
+  outline: none;
+  border-color: #2E5BFF;
+  box-shadow: 0 0 0 2px rgba(46, 91, 255, 0.15), 0 0 12px rgba(46, 91, 255, 0.2);
+}
+.input-dark::placeholder {
+  color: rgba(208, 197, 180, 0.4);
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(230, 194, 119, 0.25);
+  color: #e9e1d8;
 }

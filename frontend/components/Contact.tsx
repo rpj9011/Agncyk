@@ -24,12 +24,13 @@ export default function Contact() {
     services: [] as string[],
     message: '',
   })
-  
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errors, setErrors] = useState<FormErrors>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [errorMessage, setErrorMessage] = useState('')
   const [charCount, setCharCount] = useState(0)
+  const [activeField, setActiveField] = useState<string | null>(null)
 
   const serviceOptions = [
     'Web Development',
@@ -58,7 +59,7 @@ export default function Contact() {
         break
       case 'phone':
         const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
-        if (!value || !phoneRegex.test(value)) return 'Valid phone number is required (no spaces or special characters)'
+        if (!value || !phoneRegex.test(value)) return 'Valid phone number required (no spaces)'
         break
       case 'budget':
         if (!value) return 'Please select a budget range'
@@ -76,8 +77,13 @@ export default function Contact() {
 
   const handleBlur = (field: string) => {
     setTouched({ ...touched, [field]: true })
+    setActiveField(null)
     const error = validateField(field, formData[field as keyof typeof formData])
     setErrors({ ...errors, [field]: error })
+  }
+
+  const handleFocus = (field: string) => {
+    setActiveField(field)
   }
 
   const handleChange = (field: string, value: any) => {
@@ -95,12 +101,12 @@ export default function Contact() {
     const newServices = formData.services.includes(service)
       ? formData.services.filter(s => s !== service)
       : [...formData.services, service]
-    
+
     handleChange('services', newServices)
   }
 
   const isFormValid = () => {
-    const allErrors = Object.keys(formData).map(key => 
+    const allErrors = Object.keys(formData).map(key =>
       validateField(key, formData[key as keyof typeof formData])
     )
     return allErrors.every(error => !error)
@@ -108,20 +114,18 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Mark all fields as touched
+
     const allTouched = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {})
     setTouched(allTouched)
-    
-    // Validate all fields
+
     const allErrors: FormErrors = {}
     Object.keys(formData).forEach(key => {
       const error = validateField(key, formData[key as keyof typeof formData])
       if (error) allErrors[key as keyof FormErrors] = error
     })
-    
+
     setErrors(allErrors)
-    
+
     if (Object.keys(allErrors).length > 0) {
       return
     }
@@ -132,9 +136,7 @@ export default function Contact() {
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
 
@@ -142,15 +144,7 @@ export default function Contact() {
 
       if (response.ok) {
         setStatus('success')
-        setFormData({
-          name: '',
-          company: '',
-          email: '',
-          phone: '',
-          budget: '',
-          services: [],
-          message: '',
-        })
+        setFormData({ name: '', company: '', email: '', phone: '', budget: '', services: [], message: '' })
         setCharCount(0)
         setTouched({})
         setErrors({})
@@ -166,110 +160,191 @@ export default function Contact() {
     }
   }
 
+  const inputStyle = (field: string) => ({
+    width: '100%',
+    height: '52px',
+    padding: '0.75rem 1rem',
+    fontSize: '14px',
+    fontFamily: 'Inter, system-ui',
+    backgroundColor: 'rgba(30,27,22,0.8)',
+    border: `1px solid ${errors[field as keyof FormErrors] && touched[field]
+      ? '#ffb4ab'
+      : activeField === field
+        ? '#2E5BFF'
+        : 'rgba(77,70,57,0.8)'}`,
+    borderRadius: '0.25rem',
+    color: '#e9e1d8',
+    outline: 'none',
+    transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+    boxShadow: activeField === field
+      ? '0 0 0 2px rgba(46,91,255,0.15), 0 0 12px rgba(46,91,255,0.1)'
+      : 'none',
+  })
+
+  const labelStyle = (field: string) => ({
+    display: 'block',
+    marginBottom: '6px',
+    fontSize: '11px',
+    fontWeight: '700',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase' as const,
+    color: activeField === field ? '#2E5BFF' : errors[field as keyof FormErrors] && touched[field] ? '#ffb4ab' : '#998f80',
+    transition: 'color 0.3s ease',
+    fontFamily: 'Inter, system-ui',
+  })
+
+  // Active field indicator (cobalt monospaced label top-right)
+  const FocusLabel = ({ field }: { field: string }) => (
+    <AnimatePresence>
+      {activeField === field && (
+        <motion.span
+          initial={{ opacity: 0, x: 4 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 4 }}
+          className="absolute top-0 right-0 text-[9px] font-semibold tracking-[0.1em] uppercase"
+          style={{
+            color: '#2E5BFF',
+            fontFamily: 'Inter, system-ui',
+            transform: 'translateY(-100%)',
+            paddingBottom: '4px',
+          }}
+        >
+          FOCUS ACTIVE
+        </motion.span>
+      )}
+    </AnimatePresence>
+  )
+
   return (
-    <section id="contact" className="min-h-screen flex items-center px-8 sm:px-12 lg:px-16 bg-luxury-charcoal relative overflow-hidden py-32">
-      {/* Grain texture */}
-      <div 
+    <section
+      id="contact"
+      className="min-h-screen flex items-center px-8 sm:px-12 lg:px-16 relative overflow-hidden py-[120px]"
+      style={{ backgroundColor: '#0F0F0F' }}
+    >
+      {/* Grain */}
+      <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay animate-grain"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
         }}
       />
-      
+
       {/* Ambient gold glow */}
-      <div className="absolute right-0 top-0 w-[800px] h-[800px] bg-luxury-gold/5 rounded-full blur-3xl pointer-events-none"></div>
-      
-      <div className="max-w-7xl mx-auto relative z-10 w-full">
+      <div
+        className="absolute right-0 top-0 w-[700px] h-[700px] rounded-full blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(230,194,119,0.05) 0%, transparent 70%)' }}
+      />
+      {/* Cobalt glow left */}
+      <div
+        className="absolute left-0 bottom-0 w-[500px] h-[500px] rounded-full blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(46,91,255,0.04) 0%, transparent 70%)' }}
+      />
+
+      <div className="max-w-[1200px] mx-auto relative z-10 w-full">
         <div className="grid lg:grid-cols-2 gap-20 items-start">
-          {/* Left: Refined Messaging */}
-          <motion.div 
+          {/* Left: Messaging */}
+          <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="space-y-12"
+            className="space-y-10"
           >
             <div>
-              <h2 className="text-5xl lg:text-6xl font-display font-light text-luxury-off-white leading-tight tracking-luxury mb-8">
+              {/* Label */}
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-8 h-[1px] bg-[#e6c277]" />
+                <span className="label-caps" style={{ color: '#e6c277' }}>Get in Touch</span>
+              </div>
+
+              <h2
+                className="font-display font-bold text-[#e9e1d8] leading-tight mb-6"
+                style={{ fontSize: '48px', letterSpacing: '-0.02em' }}
+              >
                 Begin the
                 <br />
-                <span className="text-luxury-gold italic">Conversation</span>
+                <span className="text-[#e6c277] italic">Conversation</span>
               </h2>
-              <div className="w-12 h-[1px] bg-luxury-gold/60 mb-8"></div>
-              <p className="text-luxury-warm-gray/70 max-w-md leading-loose text-sm font-light">
-                30-minute strategy session to identify growth opportunities.
+              <div className="w-12 h-[1px] mb-6" style={{ backgroundColor: 'rgba(230,194,119,0.6)' }} />
+              <p className="text-[#d0c5b4] max-w-md leading-loose text-sm font-light">
+                30-minute strategy session to identify growth opportunities and define your digital roadmap.
               </p>
             </div>
 
-            <div className="space-y-6">
-              <motion.div 
-                whileHover={{ x: 4 }}
-                className="flex items-center gap-6 p-6 border border-luxury-gold/20 bg-luxury-charcoal-light/50 backdrop-blur-sm transition-all duration-500"
-              >
-                <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                  <Mail className="text-luxury-gold" size={18} strokeWidth={1.5} />
-                </div>
-                <div>
-                  <div className="font-light text-luxury-off-white text-xs uppercase tracking-ultra-wide mb-2">Email</div>
-                  <a href="mailto:rpj9011@outlook.com" className="text-luxury-gold hover:text-luxury-gold-muted transition-colors duration-500 font-light text-sm">
-                    rpj9011@outlook.com
-                  </a>
-                </div>
-              </motion.div>
-
-              <motion.div 
-                whileHover={{ x: 4 }}
-                className="flex items-center gap-6 p-6 border border-luxury-gold/20 bg-luxury-charcoal-light/50 backdrop-blur-sm transition-all duration-500"
-              >
-                <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                  <Phone className="text-luxury-gold" size={18} strokeWidth={1.5} />
-                </div>
-                <div>
-                  <div className="font-light text-luxury-off-white text-xs uppercase tracking-ultra-wide mb-2">Phone</div>
-                  <a href="tel:+919876543210" className="text-luxury-gold hover:text-luxury-gold-muted transition-colors duration-500 font-light text-sm">
-                    +91 9158853996
-                  </a>
-                </div>
-              </motion.div>
-
-              <motion.div 
-                whileHover={{ x: 4 }}
-                className="flex items-center gap-6 p-6 border border-luxury-gold/20 bg-luxury-charcoal-light/50 backdrop-blur-sm transition-all duration-500"
-              >
-                <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="text-luxury-gold" size={18} strokeWidth={1.5} />
-                </div>
-                <div>
-                  <div className="font-light text-luxury-off-white text-xs uppercase tracking-ultra-wide mb-2">Location</div>
-                  <p className="text-luxury-warm-gray/70 text-sm font-light leading-relaxed">
-                    Pune, India
-                  </p>
-                </div>
-              </motion.div>
+            {/* Contact info blocks */}
+            <div className="space-y-3">
+              {[
+                { icon: Mail, label: 'Email', value: 'rpj9011@outlook.com', href: 'mailto:rpj9011@outlook.com' },
+                { icon: Phone, label: 'Phone', value: '+91 9158853996', href: 'tel:+919158853996' },
+                { icon: MapPin, label: 'Location', value: 'Pune, India', href: null },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  whileHover={{ x: 4 }}
+                  className="flex items-center gap-5 p-5 transition-all duration-400"
+                  style={{
+                    border: '1px solid rgba(77,70,57,0.5)',
+                    backgroundColor: 'rgba(30,27,22,0.6)',
+                    borderRadius: '0px',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'rgba(230,194,119,0.3)'
+                    e.currentTarget.style.backgroundColor = 'rgba(34,31,26,0.8)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'rgba(77,70,57,0.5)'
+                    e.currentTarget.style.backgroundColor = 'rgba(30,27,22,0.6)'
+                  }}
+                >
+                  <div className="w-9 h-9 flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: 'rgba(230,194,119,0.08)', border: '1px solid rgba(230,194,119,0.15)', borderRadius: '0.25rem' }}
+                  >
+                    <item.icon style={{ color: '#e6c277', width: 16, height: 16 }} strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <div className="label-caps mb-1">{item.label}</div>
+                    {item.href ? (
+                      <a href={item.href} className="text-[#e6c277] hover:text-[#c6a45c] transition-colors duration-300 font-light text-sm">
+                        {item.value}
+                      </a>
+                    ) : (
+                      <p className="text-[#d0c5b4] text-sm font-light">{item.value}</p>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
 
-          {/* Right: Premium Form */}
-          <motion.div 
+          {/* Right: Form */}
+          <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className="relative"
           >
-            {/* Layered shadow depth */}
-            <div className="absolute inset-0 bg-gradient-to-br from-luxury-gold/10 via-luxury-off-white/5 to-luxury-gold/5 opacity-40 rounded-3xl blur-xl"></div>
-            
-            {/* Glass container */}
-            <div className="relative bg-luxury-off-white/10 backdrop-blur-lg p-10 rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.3)] border border-luxury-gold/20">
-              {/* Noise texture overlay */}
-              <div 
-                className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-3xl"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                }}
-              />
+            {/* Glow behind form */}
+            <div
+              className="absolute inset-0 blur-xl opacity-30"
+              style={{
+                background: 'linear-gradient(135deg, rgba(230,194,119,0.08) 0%, rgba(46,91,255,0.06) 100%)',
+                borderRadius: '0px',
+              }}
+            />
 
+            {/* Form container */}
+            <div
+              className="relative p-10"
+              style={{
+                backgroundColor: 'rgba(34,31,26,0.7)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(230,194,119,0.15)',
+                borderRadius: '0px',
+                boxShadow: '0 40px 100px rgba(0,0,0,0.4)',
+              }}
+            >
               <AnimatePresence mode="wait">
                 {status === 'success' ? (
                   <motion.div
@@ -282,19 +357,20 @@ export default function Contact() {
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                      transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                     >
-                      <CheckCircle size={72} className="text-luxury-gold mb-6" strokeWidth={1.5} />
+                      <CheckCircle size={64} style={{ color: '#00E676' }} strokeWidth={1.5} className="mb-6" />
                     </motion.div>
-                    <h3 className="text-3xl font-display font-light text-luxury-off-white mb-3">
+                    <h3 className="font-display text-3xl font-semibold text-[#e9e1d8] mb-3">
                       Request Received
                     </h3>
-                    <p className="text-luxury-warm-gray/80 mb-8 text-sm font-light leading-relaxed max-w-sm">
-                      We'll respond within 24 hours with next steps for your project.
+                    <p className="text-[#d0c5b4] mb-8 text-sm font-light leading-relaxed max-w-sm">
+                      We&apos;ll respond within 24 hours with next steps for your project.
                     </p>
                     <button
                       onClick={() => setStatus('idle')}
-                      className="text-luxury-gold hover:text-luxury-gold-muted transition-colors duration-300 font-light text-xs tracking-ultra-wide uppercase"
+                      className="label-caps hover:text-[#e6c277] transition-colors duration-300"
+                      style={{ color: '#998f80', cursor: 'pointer' }}
                     >
                       Send Another Message
                     </button>
@@ -306,231 +382,227 @@ export default function Contact() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onSubmit={handleSubmit}
-                    className="relative space-y-6"
+                    className="space-y-5"
                   >
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      {/* Name Field */}
-                      <div className="relative">
-                        <label className={`absolute left-4 transition-all duration-300 pointer-events-none ${
-                          formData.name || touched.name
-                            ? '-top-2 text-xs bg-luxury-charcoal-light px-2 text-luxury-gold'
-                            : 'top-4 text-sm text-luxury-warm-gray/60'
-                        }`}>
-                          Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.name}
-                          onChange={(e) => handleChange('name', e.target.value)}
-                          onBlur={() => handleBlur('name')}
-                          className={`w-full h-14 px-4 pt-2 text-sm bg-luxury-charcoal-light/60 backdrop-blur-sm border ${
-                            errors.name && touched.name
-                              ? 'border-red-500 animate-shake'
-                              : 'border-luxury-gold/20'
-                          } rounded-lg text-luxury-off-white placeholder-transparent focus:outline-none focus:border-luxury-gold focus:shadow-[0_0_20px_rgba(198,164,92,0.2)] transition-all duration-300`}
-                          placeholder="Name"
-                        />
+                    {/* Name / Company */}
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <div>
+                        <label style={labelStyle('name')}>Name *</label>
+                        <div className="relative">
+                          <FocusLabel field="name" />
+                          <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                            onBlur={() => handleBlur('name')}
+                            onFocus={() => handleFocus('name')}
+                            style={inputStyle('name')}
+                            placeholder="Your name"
+                            className={errors.name && touched.name ? 'animate-shake' : ''}
+                          />
+                        </div>
                         {errors.name && touched.name && (
-                          <p className="text-red-400 text-xs mt-1 font-light">{errors.name}</p>
+                          <p className="text-[#ffb4ab] text-xs mt-1 font-light">{errors.name}</p>
                         )}
                       </div>
-                      
-                      {/* Company Field */}
-                      <div className="relative">
-                        <label className={`absolute left-4 transition-all duration-300 pointer-events-none ${
-                          formData.company || touched.company
-                            ? '-top-2 text-xs bg-luxury-charcoal-light px-2 text-luxury-gold'
-                            : 'top-4 text-sm text-luxury-warm-gray/60'
-                        }`}>
-                          Company *
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.company}
-                          onChange={(e) => handleChange('company', e.target.value)}
-                          onBlur={() => handleBlur('company')}
-                          className={`w-full h-14 px-4 pt-2 text-sm bg-luxury-charcoal-light/60 backdrop-blur-sm border ${
-                            errors.company && touched.company
-                              ? 'border-red-500 animate-shake'
-                              : 'border-luxury-gold/20'
-                          } rounded-lg text-luxury-off-white placeholder-transparent focus:outline-none focus:border-luxury-gold focus:shadow-[0_0_20px_rgba(198,164,92,0.2)] transition-all duration-300`}
-                          placeholder="Company"
-                        />
+
+                      <div>
+                        <label style={labelStyle('company')}>Company *</label>
+                        <div className="relative">
+                          <FocusLabel field="company" />
+                          <input
+                            type="text"
+                            value={formData.company}
+                            onChange={(e) => handleChange('company', e.target.value)}
+                            onBlur={() => handleBlur('company')}
+                            onFocus={() => handleFocus('company')}
+                            style={inputStyle('company')}
+                            placeholder="Company name"
+                            className={errors.company && touched.company ? 'animate-shake' : ''}
+                          />
+                        </div>
                         {errors.company && touched.company && (
-                          <p className="text-red-400 text-xs mt-1 font-light">{errors.company}</p>
+                          <p className="text-[#ffb4ab] text-xs mt-1 font-light">{errors.company}</p>
                         )}
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      {/* Email Field */}
-                      <div className="relative">
-                        <label className={`absolute left-4 transition-all duration-300 pointer-events-none ${
-                          formData.email || touched.email
-                            ? '-top-2 text-xs bg-luxury-charcoal-light px-2 text-luxury-gold'
-                            : 'top-4 text-sm text-luxury-warm-gray/60'
-                        }`}>
-                          Email *
-                        </label>
-                        <input
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => handleChange('email', e.target.value)}
-                          onBlur={() => handleBlur('email')}
-                          className={`w-full h-14 px-4 pt-2 text-sm bg-luxury-charcoal-light/60 backdrop-blur-sm border ${
-                            errors.email && touched.email
-                              ? 'border-red-500 animate-shake'
-                              : 'border-luxury-gold/20'
-                          } rounded-lg text-luxury-off-white placeholder-transparent focus:outline-none focus:border-luxury-gold focus:shadow-[0_0_20px_rgba(198,164,92,0.2)] transition-all duration-300`}
-                          placeholder="Email"
-                        />
+                    {/* Email / Phone */}
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <div>
+                        <label style={labelStyle('email')}>Email *</label>
+                        <div className="relative">
+                          <FocusLabel field="email" />
+                          <input
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => handleChange('email', e.target.value)}
+                            onBlur={() => handleBlur('email')}
+                            onFocus={() => handleFocus('email')}
+                            style={inputStyle('email')}
+                            placeholder="you@company.com"
+                            className={errors.email && touched.email ? 'animate-shake' : ''}
+                          />
+                        </div>
                         {errors.email && touched.email && (
-                          <p className="text-red-400 text-xs mt-1 font-light">{errors.email}</p>
+                          <p className="text-[#ffb4ab] text-xs mt-1 font-light">{errors.email}</p>
                         )}
                       </div>
-                      
-                      {/* Phone Field */}
-                      <div className="relative">
-                        <label className={`absolute left-4 transition-all duration-300 pointer-events-none ${
-                          formData.phone || touched.phone
-                            ? '-top-2 text-xs bg-luxury-charcoal-light px-2 text-luxury-gold'
-                            : 'top-4 text-sm text-luxury-warm-gray/60'
-                        }`}>
-                          Phone *
-                        </label>
-                        <input
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => handleChange('phone', e.target.value)}
-                          onBlur={() => handleBlur('phone')}
-                          className={`w-full h-14 px-4 pt-2 text-sm bg-luxury-charcoal-light/60 backdrop-blur-sm border ${
-                            errors.phone && touched.phone
-                              ? 'border-red-500 animate-shake'
-                              : 'border-luxury-gold/20'
-                          } rounded-lg text-luxury-off-white placeholder-transparent focus:outline-none focus:border-luxury-gold focus:shadow-[0_0_20px_rgba(198,164,92,0.2)] transition-all duration-300`}
-                          placeholder="Phone"
-                        />
+
+                      <div>
+                        <label style={labelStyle('phone')}>Phone *</label>
+                        <div className="relative">
+                          <FocusLabel field="phone" />
+                          <input
+                            type="tel"
+                            value={formData.phone}
+                            onChange={(e) => handleChange('phone', e.target.value)}
+                            onBlur={() => handleBlur('phone')}
+                            onFocus={() => handleFocus('phone')}
+                            style={inputStyle('phone')}
+                            placeholder="+91XXXXXXXXXX"
+                            className={errors.phone && touched.phone ? 'animate-shake' : ''}
+                          />
+                        </div>
                         {errors.phone && touched.phone && (
-                          <p className="text-red-400 text-xs mt-1 font-light">{errors.phone}</p>
+                          <p className="text-[#ffb4ab] text-xs mt-1 font-light">{errors.phone}</p>
                         )}
                       </div>
                     </div>
 
-                    {/* Budget Field */}
-                    <div className="relative">
-                      <label className={`absolute left-4 transition-all duration-300 pointer-events-none ${
-                        formData.budget
-                          ? '-top-2 text-xs bg-luxury-charcoal-light px-2 text-luxury-gold'
-                          : 'top-4 text-sm text-luxury-warm-gray/60'
-                      }`}>
-                        Budget Range *
-                      </label>
-                      <select
-                        value={formData.budget}
-                        onChange={(e) => handleChange('budget', e.target.value)}
-                        onBlur={() => handleBlur('budget')}
-                        className={`w-full h-14 px-4 pt-2 text-sm bg-luxury-charcoal-light/60 backdrop-blur-sm border ${
-                          errors.budget && touched.budget
-                            ? 'border-red-500 animate-shake'
-                            : 'border-luxury-gold/20'
-                        } rounded-lg text-luxury-off-white focus:outline-none focus:border-luxury-gold focus:shadow-[0_0_20px_rgba(198,164,92,0.2)] transition-all duration-300 appearance-none cursor-pointer`}
-                      >
-                        <option value="" className="bg-luxury-charcoal-light">Select Budget</option>
-                        <option value="1L-3L" className="bg-luxury-charcoal-light">₹1L - ₹3L</option>
-                        <option value="3L-5L" className="bg-luxury-charcoal-light">₹3L - ₹5L</option>
-                        <option value="5L-10L" className="bg-luxury-charcoal-light">₹5L - ₹10L</option>
-                        <option value="10L-15L" className="bg-luxury-charcoal-light">₹10L - ₹15L</option>
-                        <option value="15L+" className="bg-luxury-charcoal-light">₹15L+</option>
-                      </select>
+                    {/* Budget */}
+                    <div>
+                      <label style={labelStyle('budget')}>Budget Range *</label>
+                      <div className="relative">
+                        <FocusLabel field="budget" />
+                        <select
+                          value={formData.budget}
+                          onChange={(e) => handleChange('budget', e.target.value)}
+                          onBlur={() => handleBlur('budget')}
+                          onFocus={() => handleFocus('budget')}
+                          style={{ ...inputStyle('budget'), appearance: 'none', cursor: 'pointer' }}
+                          className={errors.budget && touched.budget ? 'animate-shake' : ''}
+                        >
+                          <option value="" style={{ backgroundColor: '#1e1b16' }}>Select Budget</option>
+                          <option value="1L-3L" style={{ backgroundColor: '#1e1b16' }}>₹1L – ₹3L</option>
+                          <option value="3L-5L" style={{ backgroundColor: '#1e1b16' }}>₹3L – ₹5L</option>
+                          <option value="5L-10L" style={{ backgroundColor: '#1e1b16' }}>₹5L – ₹10L</option>
+                          <option value="10L-15L" style={{ backgroundColor: '#1e1b16' }}>₹10L – ₹15L</option>
+                          <option value="15L+" style={{ backgroundColor: '#1e1b16' }}>₹15L+</option>
+                        </select>
+                      </div>
                       {errors.budget && touched.budget && (
-                        <p className="text-red-400 text-xs mt-1 font-light">{errors.budget}</p>
+                        <p className="text-[#ffb4ab] text-xs mt-1 font-light">{errors.budget}</p>
                       )}
                     </div>
 
-                    {/* Services Field */}
+                    {/* Services */}
                     <div>
-                      <label className="block text-xs text-luxury-gold uppercase tracking-ultra-wide mb-4 font-light">
+                      <label
+                        className="block mb-4"
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                          color: '#e6c277',
+                          fontFamily: 'Inter, system-ui',
+                        }}
+                      >
                         Services Needed *
                       </label>
-                      <div className="grid sm:grid-cols-2 gap-3">
-                        {serviceOptions.map((service) => (
-                          <label
-                            key={service}
-                            className="flex items-center gap-3 cursor-pointer group"
-                          >
-                            <div className="relative">
-                              <input
-                                type="checkbox"
-                                checked={formData.services.includes(service)}
-                                onChange={() => handleServiceToggle(service)}
-                                className="sr-only"
-                              />
-                              <div className={`w-5 h-5 rounded border-2 transition-all duration-300 flex items-center justify-center ${
-                                formData.services.includes(service)
-                                  ? 'bg-luxury-gold border-luxury-gold'
-                                  : 'border-luxury-gold/30 group-hover:border-luxury-gold/60'
-                              }`}>
-                                {formData.services.includes(service) && (
-                                  <svg className="w-3 h-3 text-luxury-charcoal" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                )}
+                      <div className="grid sm:grid-cols-2 gap-2.5">
+                        {serviceOptions.map((service) => {
+                          const isChecked = formData.services.includes(service)
+                          return (
+                            <label
+                              key={service}
+                              className="flex items-center gap-3 cursor-pointer group"
+                            >
+                              <div className="relative flex-shrink-0">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => handleServiceToggle(service)}
+                                  className="sr-only"
+                                />
+                                <div
+                                  className="w-4 h-4 flex items-center justify-center transition-all duration-300"
+                                  style={{
+                                    backgroundColor: isChecked ? '#e6c277' : 'transparent',
+                                    border: `1.5px solid ${isChecked ? '#e6c277' : 'rgba(153,143,128,0.4)'}`,
+                                    borderRadius: '0.125rem',
+                                  }}
+                                >
+                                  {isChecked && (
+                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" style={{ stroke: '#402d00' }} />
+                                    </svg>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                            <span className="text-xs text-luxury-warm-gray/80 group-hover:text-luxury-off-white transition-colors font-light">
-                              {service}
-                            </span>
-                          </label>
-                        ))}
+                              <span
+                                className="text-xs font-light transition-colors group-hover:text-[#e9e1d8]"
+                                style={{ color: isChecked ? '#e9e1d8' : '#d0c5b4' }}
+                              >
+                                {service}
+                              </span>
+                            </label>
+                          )
+                        })}
                       </div>
                       {errors.services && touched.services && (
-                        <p className="text-red-400 text-xs mt-2 font-light">{errors.services}</p>
+                        <p className="text-[#ffb4ab] text-xs mt-2 font-light">{errors.services}</p>
                       )}
                     </div>
 
-                    {/* Message Field */}
-                    <div className="relative">
-                      <label className={`absolute left-4 transition-all duration-300 pointer-events-none ${
-                        formData.message || touched.message
-                          ? '-top-2 text-xs bg-luxury-charcoal-light px-2 text-luxury-gold'
-                          : 'top-4 text-sm text-luxury-warm-gray/60'
-                      }`}>
-                        Project Details *
-                      </label>
-                      <textarea
-                        value={formData.message}
-                        onChange={(e) => handleChange('message', e.target.value)}
-                        onBlur={() => handleBlur('message')}
-                        maxLength={1000}
-                        rows={4}
-                        className={`w-full px-4 pt-6 pb-2 text-sm bg-luxury-charcoal-light/60 backdrop-blur-sm border ${
-                          errors.message && touched.message
-                            ? 'border-red-500 animate-shake'
-                            : 'border-luxury-gold/20'
-                        } rounded-lg text-luxury-off-white placeholder-transparent focus:outline-none focus:border-luxury-gold focus:shadow-[0_0_20px_rgba(198,164,92,0.2)] transition-all duration-300 resize-none`}
-                        placeholder="Project Details"
-                      ></textarea>
+                    {/* Message */}
+                    <div>
+                      <label style={labelStyle('message')}>Project Details *</label>
+                      <div className="relative">
+                        <FocusLabel field="message" />
+                        <textarea
+                          value={formData.message}
+                          onChange={(e) => handleChange('message', e.target.value)}
+                          onBlur={() => handleBlur('message')}
+                          onFocus={() => handleFocus('message')}
+                          maxLength={1000}
+                          rows={4}
+                          className={errors.message && touched.message ? 'animate-shake' : ''}
+                          style={{
+                            ...inputStyle('message'),
+                            height: 'auto',
+                            paddingTop: '0.75rem',
+                            paddingBottom: '0.75rem',
+                            resize: 'none',
+                          }}
+                          placeholder="Tell us about your project goals..."
+                        />
+                      </div>
                       <div className="flex justify-between items-center mt-1">
                         {errors.message && touched.message ? (
-                          <p className="text-red-400 text-xs font-light">{errors.message}</p>
-                        ) : (
-                          <div></div>
-                        )}
-                        <span className="text-xs text-luxury-mid-gray font-light">{charCount}/1000</span>
+                          <p className="text-[#ffb4ab] text-xs font-light">{errors.message}</p>
+                        ) : <div />}
+                        <span className="text-xs font-light" style={{ color: '#998f80' }}>{charCount}/1000</span>
                       </div>
                     </div>
 
-                    {/* Error Message */}
+                    {/* Error message */}
                     <AnimatePresence>
                       {status === 'error' && (
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
-                          className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg backdrop-blur-sm"
+                          className="flex items-center gap-3 p-4"
+                          style={{
+                            backgroundColor: 'rgba(255,180,171,0.08)',
+                            border: '1px solid rgba(255,180,171,0.25)',
+                            borderRadius: '0.25rem',
+                          }}
                         >
-                          <AlertCircle size={18} className="text-red-400 flex-shrink-0" strokeWidth={1.5} />
-                          <p className="text-xs text-red-400 font-light">{errorMessage}</p>
+                          <AlertCircle size={16} style={{ color: '#ffb4ab', flexShrink: 0 }} strokeWidth={1.5} />
+                          <p className="text-xs font-light" style={{ color: '#ffb4ab' }}>{errorMessage}</p>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -539,35 +611,51 @@ export default function Contact() {
                     <button
                       type="submit"
                       disabled={status === 'loading' || !isFormValid()}
-                      className="w-full bg-gradient-to-r from-luxury-gold to-luxury-gold-muted text-luxury-charcoal py-5 rounded-2xl font-light text-xs tracking-ultra-wide uppercase hover:shadow-[0_0_30px_rgba(198,164,92,0.4)] transition-all duration-500 flex items-center justify-center gap-3 group disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none relative overflow-hidden"
+                      className="w-full py-4 font-semibold text-xs tracking-[0.1em] uppercase flex items-center justify-center gap-3 group transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        background: 'linear-gradient(135deg, #e6c277 0%, #c6a45c 100%)',
+                        color: '#402d00',
+                        borderRadius: '0.25rem',
+                        boxShadow: '0 4px 24px rgba(230,194,119,0.2)',
+                        fontFamily: 'Inter, system-ui',
+                      }}
+                      onMouseEnter={e => {
+                        if (!e.currentTarget.disabled) {
+                          e.currentTarget.style.boxShadow = '0 8px 40px rgba(230,194,119,0.4)'
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.boxShadow = '0 4px 24px rgba(230,194,119,0.2)'
+                      }}
                     >
                       {status === 'loading' ? (
                         <>
-                          <Loader2 size={16} className="animate-spin" />
+                          <Loader2 size={14} className="animate-spin" />
                           <span>Sending...</span>
                         </>
                       ) : (
                         <>
                           <span>Start Your Project</span>
-                          <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+                          <span className="group-hover:translate-x-1 transition-transform duration-300 inline-block">→</span>
                         </>
                       )}
                     </button>
-                    
-                    {/* Trust Indicators */}
-                    <div className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-luxury-gold/10">
-                      <div className="flex items-center gap-2 text-xs text-luxury-warm-gray/70 font-light">
-                        <Lock size={14} className="text-luxury-gold/60" strokeWidth={1.5} />
-                        <span>100% Confidential</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-luxury-warm-gray/70 font-light">
-                        <Shield size={14} className="text-luxury-gold/60" strokeWidth={1.5} />
-                        <span>Secure Submission</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-luxury-warm-gray/70 font-light">
-                        <Clock size={14} className="text-luxury-gold/60" strokeWidth={1.5} />
-                        <span>24h Response Time</span>
-                      </div>
+
+                    {/* Trust indicators */}
+                    <div
+                      className="flex flex-wrap items-center justify-center gap-6 pt-5"
+                      style={{ borderTop: '1px solid rgba(77,70,57,0.5)' }}
+                    >
+                      {[
+                        { icon: Lock, text: '100% Confidential' },
+                        { icon: Shield, text: 'Secure Submission' },
+                        { icon: Clock, text: '24h Response' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs font-light" style={{ color: '#998f80' }}>
+                          <item.icon size={12} style={{ color: 'rgba(230,194,119,0.6)' }} strokeWidth={1.5} />
+                          <span>{item.text}</span>
+                        </div>
+                      ))}
                     </div>
                   </motion.form>
                 )}

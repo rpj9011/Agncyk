@@ -72,7 +72,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#E10600',
+  themeColor: '#e6c277',
 }
 
 export default function RootLayout({
@@ -82,7 +82,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} font-sans antialiased bg-white text-brand-black`}>
+      <body className={`${inter.variable} font-sans antialiased`} style={{ backgroundColor: '#0F0F0F', color: '#e9e1d8' }}>
         {children}
       </body>
     </html>

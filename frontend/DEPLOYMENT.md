@@ -34,6 +34,22 @@ The project is configured to:
 - Use cached global mongoose connections for optimal performance
 - Handle missing environment variables gracefully in development
 
+### Required Vercel project settings
+
+In **Project Settings → General → Root Directory** and **Build & Development Settings**:
+
+| Setting | Value |
+|---------|-------|
+| Root Directory | `frontend` |
+| Framework Preset | **Next.js** (not "Other") |
+| Build Command | `npm run build` (or leave default) |
+| Output Directory | **leave empty** (do not set `.next` or `out`) |
+| Install Command | `npm install` (or leave default) |
+
+If Framework Preset is **Other**, Vercel may run `next build` successfully but **will not wire up Next.js routes**, and every URL returns `404: NOT_FOUND`.
+
+After changing these settings, redeploy with **Use existing Build Cache** unchecked.
+
 ## Troubleshooting
 
 ### Build fails with `<Html> should not be imported outside of pages/_document`
@@ -41,6 +57,16 @@ The project is configured to:
 This happens when `NODE_ENV` is set to a non-production value (for example `development`) in Vercel environment variables. Vercel already sets `NODE_ENV=production` during builds; overriding it breaks static prerendering.
 
 **Fix:** In Vercel → Project Settings → Environment Variables, delete any `NODE_ENV` entry. The build script also forces production mode as a safeguard.
+
+### Site shows `404: NOT_FOUND` but deployment status is Ready
+
+This is a **Vercel routing** issue, not a Next.js page 404.
+
+**Fix:**
+1. Set **Framework Preset** to **Next.js** (not Other)
+2. Clear **Output Directory** (must be blank)
+3. Set **Root Directory** to `frontend`
+4. Redeploy without build cache
 
 If you encounter other build errors:
 - Ensure MONGODB_URI is set in Vercel environment variables

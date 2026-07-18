@@ -23,55 +23,81 @@ export default function About() {
     return () => observer.disconnect()
   }, [])
 
+  const metrics = [
+    { value: '6+', label: 'Projects Delivered', color: '#e6c277' },
+    { value: '98%', label: 'Client Retention', color: '#e6c277' },
+    { value: '3.5x', label: 'Average Growth', color: '#00E676' },
+  ]
+
   return (
-    <section 
-      id="about" 
+    <section
+      id="about"
       ref={sectionRef}
-      className="py-40 px-8 sm:px-12 lg:px-16 bg-luxury-charcoal relative overflow-hidden"
+      className="relative py-[120px] px-8 sm:px-12 lg:px-16 overflow-hidden"
+      style={{ backgroundColor: '#0F0F0F' }}
     >
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 opacity-[0.02]" style={{
-        backgroundImage: 'radial-gradient(circle, #C6A45C 1px, transparent 1px)',
+      {/* Subtle dot grid pattern */}
+      <div className="absolute inset-0 opacity-[0.025]" style={{
+        backgroundImage: 'radial-gradient(circle, #e6c277 1px, transparent 1px)',
         backgroundSize: '32px 32px'
       }} />
 
-      <div className="max-w-6xl mx-auto relative">
+      {/* Ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse, rgba(230,194,119,0.05) 0%, transparent 70%)' }} />
+
+      <div className="max-w-[1200px] mx-auto relative">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Refined Content */}
           <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <h2 className="text-5xl lg:text-6xl font-display font-light leading-tight text-luxury-off-white tracking-luxury mb-12">
+
+            {/* Label */}
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <div className="w-8 h-[1px] bg-[#e6c277]" />
+              <span className="label-caps" style={{ color: '#e6c277' }}>Our Philosophy</span>
+              <div className="w-8 h-[1px] bg-[#e6c277]" />
+            </div>
+
+            <h2
+              className="font-display font-bold text-[#e9e1d8] leading-tight mb-10"
+              style={{ fontSize: '52px', letterSpacing: '-0.02em' }}
+            >
               Most agencies promise results.
               <br />
-              <span className="text-luxury-gold italic">We engineer them.</span>
+              <span className="text-[#e6c277] italic">We engineer them.</span>
             </h2>
-            
-            <div className="w-12 h-[1px] bg-luxury-gold/60 mx-auto mb-16" />
-            
-            <div className="space-y-8 text-luxury-warm-gray/70 leading-loose max-w-2xl mx-auto font-light text-base">
-              <p>
-                Since 2018, we've partnered with over 150 businesses to architect digital systems that convert ambition into measurable revenue.
+
+            <div className="w-12 h-[1px] mx-auto mb-12" style={{ backgroundColor: 'rgba(230,194,119,0.6)' }} />
+
+            <div className="space-y-6 max-w-2xl mx-auto">
+              <p className="text-[#d0c5b4] leading-loose font-light text-base">
+                Since 2023, we&apos;ve partnered with ambitious businesses to architect digital systems that convert ambition into measurable revenue.
               </p>
-              <p className="text-luxury-off-white/90 text-lg font-light italic">
+              <p className="text-[#e9e1d8] text-lg font-light italic" style={{ fontFamily: 'Playfair Display, Georgia, serif' }}>
                 Make growth predictable and profitable.
               </p>
             </div>
 
-            {/* Elegant Metrics */}
-            <div className="flex justify-center gap-20 mt-24 pt-16 border-t border-luxury-gold/10">
-              {[
-                { value: '6+', label: 'Projects Delivered' },
-                { value: '98%', label: 'Client Retention' },
-                { value: '3.5x', label: 'Average Growth' },
-              ].map((metric, index) => (
-                <div 
-                  key={index}
-                  className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-                  style={{ transitionDelay: `${(index + 1) * 150}ms` }}
-                >
-                  <div className="text-4xl font-display font-light text-luxury-gold mb-3">{metric.value}</div>
-                  <div className="text-xs text-luxury-mid-gray uppercase tracking-ultra-wide font-light">{metric.label}</div>
-                </div>
-              ))}
+            {/* Metric Blocks with hairline dividers */}
+            <div
+              className="flex justify-center mt-20 pt-12"
+              style={{ borderTop: '1px solid rgba(77,70,57,0.6)' }}
+            >
+              <div className="flex items-stretch gap-0">
+                {metrics.map((metric, index) => (
+                  <div key={index} className="flex items-stretch">
+                    {index > 0 && <div className="hairline mx-10" />}
+                    <div
+                      className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                      style={{ transitionDelay: `${(index + 1) * 150}ms` }}
+                    >
+                      <div className="metric-num-sm" style={{ color: metric.color }}>
+                        {metric.value}
+                      </div>
+                      <div className="label-caps mt-2">{metric.label}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
