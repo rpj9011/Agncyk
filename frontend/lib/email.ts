@@ -99,7 +99,7 @@ export function getClientConfirmationEmail(name: string, company: string) {
                 <strong>Agency K</strong> | Premium Digital Solutions
               </p>
               <p style="margin: 0; color: #525252; font-size: 13px;">
-                📧 hello@agencyk.in | 📞 +91 98765 43210
+                📧 rpj9011@outlook.com | 📞 +91 9158853996
               </p>
             </td>
           </tr>

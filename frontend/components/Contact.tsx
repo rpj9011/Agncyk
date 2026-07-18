@@ -130,7 +130,7 @@ export default function Contact() {
     setErrorMessage('')
 
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,8 +211,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <div className="font-light text-luxury-off-white text-xs uppercase tracking-ultra-wide mb-2">Email</div>
-                  <a href="mailto:hello@agencyk.in" className="text-luxury-gold hover:text-luxury-gold-muted transition-colors duration-500 font-light text-sm">
-                    hello@agencyk.in
+                  <a href="mailto:rpj9011@outlook.com" className="text-luxury-gold hover:text-luxury-gold-muted transition-colors duration-500 font-light text-sm">
+                    rpj9011@outlook.com
                   </a>
                 </div>
               </motion.div>
@@ -227,7 +227,7 @@ export default function Contact() {
                 <div>
                   <div className="font-light text-luxury-off-white text-xs uppercase tracking-ultra-wide mb-2">Phone</div>
                   <a href="tel:+919876543210" className="text-luxury-gold hover:text-luxury-gold-muted transition-colors duration-500 font-light text-sm">
-                    +91 98765 43210
+                    +91 9158853996
                   </a>
                 </div>
               </motion.div>
@@ -242,7 +242,7 @@ export default function Contact() {
                 <div>
                   <div className="font-light text-luxury-off-white text-xs uppercase tracking-ultra-wide mb-2">Location</div>
                   <p className="text-luxury-warm-gray/70 text-sm font-light leading-relaxed">
-                    Bangalore, India
+                    Pune, India
                   </p>
                 </div>
               </motion.div>
@@ -435,12 +435,12 @@ export default function Contact() {
                             : 'border-luxury-gold/20'
                         } rounded-lg text-luxury-off-white focus:outline-none focus:border-luxury-gold focus:shadow-[0_0_20px_rgba(198,164,92,0.2)] transition-all duration-300 appearance-none cursor-pointer`}
                       >
-                        <option value="" className="bg-luxury-charcoal-light">Select budget</option>
-                        <option value="10k-25k" className="bg-luxury-charcoal-light">₹10k - ₹25k</option>
-                        <option value="25k-50k" className="bg-luxury-charcoal-light">₹25k - ₹50k</option>
-                        <option value="50k-1L" className="bg-luxury-charcoal-light">₹50k - ₹1L</option>
-                        <option value="1L-5L" className="bg-luxury-charcoal-light">₹1L - ₹5L</option>
-                        <option value="5L+" className="bg-luxury-charcoal-light">₹5L+</option>
+                        <option value="" className="bg-luxury-charcoal-light">Select Budget</option>
+                        <option value="1L-3L" className="bg-luxury-charcoal-light">₹1L - ₹3L</option>
+                        <option value="3L-5L" className="bg-luxury-charcoal-light">₹3L - ₹5L</option>
+                        <option value="5L-10L" className="bg-luxury-charcoal-light">₹5L - ₹10L</option>
+                        <option value="10L-15L" className="bg-luxury-charcoal-light">₹10L - ₹15L</option>
+                        <option value="15L+" className="bg-luxury-charcoal-light">₹15L+</option>
                       </select>
                       {errors.budget && touched.budget && (
                         <p className="text-red-400 text-xs mt-1 font-light">{errors.budget}</p>

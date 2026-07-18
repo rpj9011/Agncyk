@@ -23,43 +23,49 @@ export default function Footer() {
         {/* Contact Information - Minimal */}
         <div className="flex flex-col md:flex-row justify-center items-center gap-12 mb-20 pb-16 border-b border-luxury-gold/10">
           <a 
-            href="mailto:hello@agencyk.in" 
+            href="mailto:rpj9011@outlook.com" 
             className="flex items-center gap-3 text-luxury-warm-gray hover:text-luxury-gold transition-colors duration-500 text-sm font-light"
           >
             <Mail size={16} className="text-luxury-gold" />
-            hello@agencyk.in
+            rpj9011@outlook.com
           </a>
           <a 
             href="tel:+919876543210" 
             className="flex items-center gap-3 text-luxury-warm-gray hover:text-luxury-gold transition-colors duration-500 text-sm font-light"
           >
             <Phone size={16} className="text-luxury-gold" />
-            +91 98765 43210
+            +91 91588 53996
           </a>
           <div className="flex items-center gap-3 text-luxury-warm-gray text-sm font-light">
             <MapPin size={16} className="text-luxury-gold" />
-            Bangalore, India
+            Pune, India
           </div>
         </div>
 
         {/* Refined Social Icons */}
         <div className="flex justify-center gap-8 mb-16">
           <a 
-            href="#" 
+            href="https://www.linkedin.com/company/agencyk" 
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-12 h-12 flex items-center justify-center border border-luxury-gold/20 hover:border-luxury-gold hover:bg-luxury-gold/10 transition-all duration-500"
             aria-label="LinkedIn"
           >
             <Linkedin size={18} className="text-luxury-gold" />
           </a>
           <a 
-            href="#" 
+            href="https://twitter.com/agencyk" 
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-12 h-12 flex items-center justify-center border border-luxury-gold/20 hover:border-luxury-gold hover:bg-luxury-gold/10 transition-all duration-500"
             aria-label="Twitter"
           >
             <Twitter size={18} className="text-luxury-gold" />
           </a>
           <a 
-            href="#" 
+            href="https://www.instagram.com/agencyk" 
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-12 h-12 flex items-center justify-center border border-luxury-gold/20 hover:border-luxury-gold hover:bg-luxury-gold/10 transition-all duration-500"
             aria-label="Instagram"
           >

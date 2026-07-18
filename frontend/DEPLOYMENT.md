@@ -36,7 +36,13 @@ The project is configured to:
 
 ## Troubleshooting
 
-If you encounter build errors:
+### Build fails with `<Html> should not be imported outside of pages/_document`
+
+This happens when `NODE_ENV` is set to a non-production value (for example `development`) in Vercel environment variables. Vercel already sets `NODE_ENV=production` during builds; overriding it breaks static prerendering.
+
+**Fix:** In Vercel → Project Settings → Environment Variables, delete any `NODE_ENV` entry. The build script also forces production mode as a safeguard.
+
+If you encounter other build errors:
 - Ensure MONGODB_URI is set in Vercel environment variables
 - Verify the connection string format is correct
 - Check that the MongoDB cluster allows connections from Vercel IPs (0.0.0.0/0)

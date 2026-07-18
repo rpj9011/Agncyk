@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
@@ -25,8 +25,11 @@ export const metadata: Metadata = {
   authors: [{ name: 'Agency K' }],
   creator: 'Agency K',
   publisher: 'Agency K',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
-  openGraph: {
+  metadataBase: new URL(
+  process.env.NEXT_PUBLIC_SITE_URL?.startsWith('http') 
+    ? process.env.NEXT_PUBLIC_SITE_URL 
+    : `https://${process.env.NEXT_PUBLIC_SITE_URL || 'localhost:3000'}`
+),  openGraph: {
     type: 'website',
     locale: 'en_IN',
     url: '/',
@@ -62,6 +65,14 @@ export const metadata: Metadata = {
   verification: {
     google: 'your-google-verification-code',
   },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#E10600',
 }
 
 export default function RootLayout({
@@ -71,11 +82,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="theme-color" content="#E10600" />
-      </head>
       <body className={`${inter.variable} font-sans antialiased bg-white text-brand-black`}>
         {children}
       </body>
